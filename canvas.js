@@ -49,28 +49,24 @@ class Particle {
     if (this.position.x > canvas.width - buffer) {
       this.colour = "#FF0000";
       // rotate towards center
-      // this.acceleration.angular += (this.velocity.theta - this.position.vectorTo(screenCenter).theta)
       this.acceleration.x = screenCenter.x - this.position.x;
       this.acceleration.y = screenCenter.y - this.position.y;
     }
     if (this.position.x < buffer) {
       this.colour = "#FF0000";
       // rotate towards center
-      // this.acceleration.angular += (this.velocity.theta - this.position.vectorTo(screenCenter).theta)
       this.acceleration.x = screenCenter.x - this.position.x;
       this.acceleration.y = screenCenter.y - this.position.y;
     }
     if (this.position.y > canvas.height - buffer) {
       this.colour = "#0000FF";
       // rotate towards center
-      // this.acceleration.angular += (this.velocity.theta - this.position.vectorTo(screenCenter).theta)
       this.acceleration.x = screenCenter.x - this.position.x;
       this.acceleration.y = screenCenter.y - this.position.y;
     }
     if (this.position.y < buffer) {
       this.colour = "#0000FF";
       // rotate towards center
-      // this.acceleration.angular += (this.velocity.theta - this.position.vectorTo(screenCenter).theta)
       this.acceleration.x = screenCenter.x - this.position.x;
       this.acceleration.y = screenCenter.y - this.position.y;
     }
