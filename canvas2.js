@@ -1,4 +1,4 @@
-import { Vector2 } from "./Vector2.js";
+import Vector2 from "./Vector2.js";
 window.Vector2 = Vector2;
 
 const canvas = document.querySelector("#canvas1");
@@ -22,13 +22,11 @@ window.addEventListener("mousemove", function (e) {
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-function vectorTo(from, to) {}
-
 class Particle {
   constructor(position, velocity, size, colour) {
     this.position = position;
     this.velocity = velocity;
-    this.acceleration = new Vector2({ x: 0, y: 0 })
+    this.acceleration = new Vector2(0, 0);
     this.maxVelocity = { linear: 2, angular: 1 };
     this.size = size;
     this.colour = colour;
@@ -95,21 +93,24 @@ class Particle {
       }
     }
 
-
-
     // limit turn rate
-    let oldTheta = this.velocity.theta;
+    let oldDirection = this.velocity.direction;
     this.velocity.x += this.acceleration.x;
     this.velocity.y += this.acceleration.y;
-    let deltaTheta = 180 - ((180 - this.velocity.theta + oldTheta) % 360);
-    if (deltaTheta > this.maxVelocity.angular) {
-      if (deltaTheta > 0) {
-        this.velocity.theta = oldTheta + this.maxVelocity;
+    let deltaDirection =
+      180 - ((180 - this.velocity.direction + oldDirection) % 360);
+    if (deltaDirection > this.maxVelocity.angular) {
+      if (deltaDirection > 0) {
+        this.velocity.direction = oldDirection + this.maxVelocity;
       } else {
-        this.velocity.theta = oldTheta - this.maxVelocity;
+        this.velocity.direction = oldDirection - this.maxVelocity;
       }
     }
-    this.velocity.r = clamp(this.velocity.r,0,this.maxVelocity.linear)
+    this.velocity.magnitude = clamp(
+      this.velocity.magnitude,
+      0,
+      this.maxVelocity.linear
+    );
 
     // move
     this.position.x += this.velocity.x;
@@ -124,11 +125,8 @@ function init() {
   let numberOfParticles = (canvas.height * canvas.width) / 9000;
   for (let i = 0; i < numberOfParticles; i++) {
     let size = Math.random() * 5 + 1;
-    let position = new Vector2({ x: screenCenter.x, y: screenCenter.y / 2 }); //new Vector2({x: Math.random() * (innerWidth - buffer - buffer) + buffer,y:Math.random() * (innerHeight - buffer - buffer) + buffer})
-    let velocity = new Vector2({
-      x: Math.random() * 6 - 3,
-      y: Math.random() * 6 - 3,
-    });
+    let position = new Vector2(screenCenter.x, screenCenter.y / 2); //new Vector2(Math.random() * (innerWidth - buffer - buffer) + buffer,Math.random() * (innerHeight - buffer - buffer) + buffer)
+    let velocity = new Vector2(Math.random() * 6 - 3, Math.random() * 6 - 3);
     let colour = "#8C5523";
 
     particlesArray.push(new Particle(position, velocity, size, colour));
@@ -157,8 +155,8 @@ function connect() {
         ctx.strokeStyle = "rgba(140,85,31,1)";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+        ctx.moveTo(particlesArray[a].position.x, particlesArray[a].position.y);
+        ctx.lineTo(particlesArray[b].position.x, particlesArray[b].position.y);
         ctx.stroke();
       }
     }

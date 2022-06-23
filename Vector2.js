@@ -1,109 +1,149 @@
 /**
  *
- * @param {x: number, y: number} vector - 2d vector in cartesian form
- * @returns {{r: number, theta: number}} 2d vector in polar form
- */
-
-function cartesianToPolar(x, y) {
-  return {
-    r: Math.sqrt(x ** 2 + y ** 2),
-    theta: Math.atan2(y, x) * (180 / Math.PI),
-  };
-}
-
-/**
- *
  * @param {r: number, theta: number} vector - 2d vector in polar form
  * @returns {{x:number, y: number}} - 2d vector in cartesian form
  */
 function polarToCartesian(r, theta) {
-  return {
-    x: r * Math.cos(theta),
-    y: r * Math.sin(theta),
-  };
+  return [r * Math.cos(toRadians(theta)), r * Math.sin(toRadians(theta))];
 }
 
-class Vector2 {
-  #_x;
-  #_y;
-  #_r;
-  #_theta;
-  constructor({ x, y, r, theta } = {}) {
-    if (x != null && y != null && !(r != null && theta != null)) {
-      this.#_x = x;
-      this.#_y = y;
-      this._calcPolar();
-    } else if (r != null && theta != null && !(x != null && y != null)) {
-      this.#_r = r;
-      this.#_theta = theta;
-      this._calcCartesian();
+const toRadians = (degree) => degree * (Math.PI / 180);
+const toDegrees = (radians) => radians * (180 / Math.PI);
+const setPrecision = (number, precision) => +number.toFixed(precision);
+
+class Vector {}
+
+window.Vector = Vector;
+
+class Vector2 extends Vector {
+  static canOperateOn(object) {
+    return typeof object.x == "number" && typeof object.y == "number";
+  }
+
+  static subtract(vector1, vector2) {
+    if (this.canOperateOn(vector1) && this.canOperateOn(vector2)) {
+      return new Vector2(vector1.x - vector2.x, vector1.y - vector2.y);
+    } else {
+      throw new Error("Can not operate on one or either of these objects");
     }
   }
 
-  /**
-   * @param {number} v
-   */
-  set x(v) {
-    this.#_x = v;
-    this._calcPolar();
+  static add(vector1, vector2) {
+    if (this.canOperateOn(vector1) && this.canOperateOn(vector2)) {
+      return new Vector2(vector1.x + vector2.x, vector1.y + vector2.y);
+    } else {
+      throw new Error("Can not operate on one or either of these objects");
+    }
   }
 
-  /**
-   * @param {number} v
-   */
-  set y(v) {
-    this.#_y = v;
-    this._calcPolar();
+  static divide(vector1, number) {
+    if (this.canOperateOn(vector1) && typeof number === "number") {
+      return new Vector2(vector1.x / number, vector1.y / number);
+    } else {
+      throw new Error("Can not operate on one or either of these objects");
+    }
   }
 
-  /**
-   * @param {number} v
-   */
-  set r(v) {
-    this.#_r = v;
-    this._calcCartesian();
+  static scalarMultiply(vector1, number) {
+    if (this.canOperateOn(vector1) && typeof number === "number") {
+      return new Vector2(vector1.x * number, vector1.y * number);
+    }else {
+      throw new Error("Can not operate on one or either of these objects");
+    }
   }
 
-  /**
-   * @param {number} v
-   */
-  set theta(v) {
-    this.#_theta = v;
-    this._calcCartesian();
+  static distanceBetween(vector1, vector2) {
+    if (this.canOperateOn(vector1) && this.canOperateOn(vector2)) {
+      return Math.hypot(vector2.x - vector1.x, vector2.y - vector1.y);
+    } else {
+      throw new Error("Can not calculate the distance between these objects");
+    }
   }
 
-  _calcPolar() {
-    this.#_r = +Math.hypot(this.#_x, this.#_y).toFixed(5);
-    this.#_theta = +(Math.atan2(this.#_y, this.#_x) * (180 / Math.PI)).toFixed(
-      5
-    );
+  constructor(x = 0, y = 0) {
+    super();
+    this.x = x;
+    this.y = y;
   }
 
-  _calcCartesian() {
-    this.#_x = +(this.#_r * Math.cos(this.#_theta / (180 / Math.PI))).toFixed(
-      5
-    );
-    this.#_y = +(this.#_r * Math.sin(this.#_theta / (180 / Math.PI))).toFixed(
-      5
-    );
+  get direction() {
+    return (toDegrees(Math.atan2(this.y, this.x)) + 360) % 360;
   }
 
-  vectorTo(target) {
-    return new Vector2({ x: target.x - this.x, y: target.y - this.y });
+  set direction(value) {
+    if (this.magnitude === 0) {
+      [this.x, this.y] = polarToCartesian(1, value);
+      this.magnitude = 0.000001;
+    } else {
+      [this.x, this.y] = polarToCartesian(this.magnitude, value);
+    }
   }
 
-  get x() {
-    return this.#_x;
+  get magnitude() {
+    return Math.hypot(this.x, this.y);
   }
-  get y() {
-    return this.#_y;
+
+  set magnitude(value) {
+    [this.x, this.y] = polarToCartesian(value, this.direction);
   }
-  get r() {
-    return this.#_r;
+
+  toString() {
+    return `x: ${this.x}, y: ${this.y}`;
   }
-  get theta() {
-    return this.#_theta;
+
+  add(vector) {
+    if (Vector2.canOperateOn(vector)) {
+      this.x += vector.x;
+      this.y += vector.y;
+    } else {
+      throw new Error("Cannot add this object to a vector");
+    }
+  }
+
+  subtract(vector) {
+    if (Vector2.canOperateOn(vector)) {
+      this.x -= vector.x;
+      this.y -= vector.y;
+    } else {
+      throw new Error("Cannot subtract this object from a vector");
+    }
+  }
+
+  divide(number) {
+    if (typeof number === "number") {
+      this.x /= number;
+      this.y /= number;
+    }
+  }
+
+  scalarMultiply(number){
+    if (typeof number === "number") {
+      this.x *= number;
+      this.y *= number;
+    }
+  }
+
+  distanceTo(vector) {
+    if (Vector2.canOperateOn(vector)) {
+      return Math.hypot(vector.x - this.x, vector.y - this.y);
+    } else {
+      throw new Error("Cannot calculate distance to this vector");
+    }
+  }
+
+  toUnitVector() {
+    if (this.magnitude > 1) {
+      this.x / this.magnitude;
+      this.y / this.magnitude;
+    }
+  }
+
+  reset() {
+    this.x = 0;
+    this.y = 0;
   }
 }
 
-export { Vector2, cartesianToPolar, polarToCartesian };
+Vector2.prototype.toString = () => "Vector2";
+
+export default Vector2;
