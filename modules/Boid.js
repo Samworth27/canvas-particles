@@ -64,7 +64,19 @@ class Boid extends Particle {
     velocity.direction = Math.random() * 360;
 
     super(container, id, position, velocity, size, colour, context);
-    this.steering = new Vector2();
+    this.forces = {
+      cohesion: new Vector2(),
+      alignment: new Vector2(),
+      separation: new Vector2(),
+      reset: function () {
+        this.cohesion.reset();
+        this.alignment.reset();
+        this.separation.reset();
+      },
+      sumOfAll: function () {
+        return this.cohesion.add(this.alignment.add(this.separation));
+      }
+    };
   }
 
   draw() {
@@ -92,10 +104,17 @@ class Boid extends Particle {
     //   force.scale(Particle.avoidanceFactor);
     //   this.steering.add(force);
     // }
-    if(this.position.y > window.innerHeight){
-      this.steering.y = -10;
-    }else if(this.position.y < 0){
-      this.steering.y = 10;
+
+    // screen wrapping
+    if (this.position.y > window.innerHeight) {
+      this.position.y -= window.innerHeight;
+    } else if (this.position.y < 0) {
+      this.position.y += window.innerHeight;
+    }
+    if (this.position.x > window.innerWidth) {
+      this.position.x -= window.innerWidth;
+    } else if (this.position.x < 0) {
+      this.position.x += window.innerWidth;
     }
   }
 
@@ -119,7 +138,7 @@ class Boid extends Particle {
   separation() {}
 
   move(dt) {
-    this.acceleration = Vector2.scale(this.steering, dt);
+    this.acceleration.add(this.forces.sumOfAll());
     this.limitVelocityAngular(dt);
     this.velocity.add(Vector2.scale(this.acceleration, dt));
     this.limitVelocityLinear(dt);
@@ -153,7 +172,7 @@ class Boid extends Particle {
 
   update(dt) {
     this.acceleration.reset();
-    this.steering.reset();
+    // this.forces.reset();
     this.avoidEdges();
     this.move(dt);
     this.draw();
