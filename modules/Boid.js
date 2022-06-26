@@ -1,26 +1,35 @@
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-const sigmoid = (x) => 4 / (1 + Math.E ** -x);
-
+const sigmoid = (x) => 2 / (1 + Math.E ** -x);
+// let numberOfParticles = (canvas.height * canvas.width) / 9000;
 class Particle {
   static maxSpeed = 5;
+  static minSpeed = 1;
   static maxTurn = 5;
-  static buffer = 100;
+  static buffer = 10;
   static instances = [];
   static perception = 50;
   static crowding = 20;
-  static separationFactor = 1 / 5;
-  static cohesionFactor = 1 / 100;
-  static alignmentFactor = 0.5;
+  static separationFactor = 10;
+  static cohesionFactor = 5;
+  static alignmentFactor = 10;
+  static avoidanceFactor = 100;
 
   constructor(position, velocity, size, colour, context) {
     this.position = position;
     this.velocity = velocity;
     this.acceleration = new Vector2();
+    this.steering = new Vector2();
     this.size = size;
     this.colour = colour;
     this.ctx = context;
     this.id = Particle.instances.length;
     Particle.instances.push(this);
+  }
+
+  logIfZero(value) {
+    if (this.id === 0) {
+      console.log(value);
+    }
   }
 
   draw() {
@@ -36,7 +45,7 @@ class Particle {
     this.ctx.fillStyle = this.id == 0 ? "#FFFFFF" : this.colour;
     this.ctx.fill();
     this.ctx.moveTo(this.position.x, this.position.y);
-    this.ctx.strokeStyle = "black"
+    this.ctx.strokeStyle = "black";
     this.ctx.lineTo(
       this.position.x + this.velocity.x * (this.size / 2),
       this.position.y + this.velocity.y * (this.size / 2)
@@ -53,9 +62,10 @@ class Particle {
         this.position.x + Particle.buffer - window.innerWidth,
       ].reduce((a, b) => Math.max(a, b), -Infinity) > 0
     ) {
-      this.acceleration.add(
-        Vector2.subtract(Particle.screenCenter, this.position)
-      );
+      let force = Vector2.subtract(Particle.screenCenter, this.position);
+      force.toUnitVector();
+      force.scalarMultiply(Particle.avoidanceFactor)
+      this.steering.add(force);
     }
   }
   getNeighbours() {
@@ -80,7 +90,7 @@ class Particle {
     force.subtract(this.velocity);
     force.toUnitVector();
     force.scalarMultiply(Particle.alignmentFactor);
-    this.acceleration.add(force);
+    this.steering.add(force);
   }
 
   cohesion() {
@@ -91,28 +101,33 @@ class Particle {
     force.toUnitVector();
     force.scalarMultiply(Particle.cohesionFactor);
 
-    this.acceleration.add(force);
+    this.steering.add(force);
   }
   separation() {
     let force = new Vector2();
     this.neighbours.forEach((neighbour) => {
-      if (this.position.distanceTo(neighbour.position) < Particle.crowding) {
+      if (
+        this.position.distanceTo(neighbour.position) <
+        Particle.crowding + this.size
+      ) {
         force.subtract(Vector2.subtract(this.position, neighbour.position));
-        this.connect(neighbour)
+        this.connect(neighbour);
       }
     });
     force.toUnitVector();
     force.scalarMultiply(Particle.separationFactor);
-    this.acceleration.subtract(force);
+    this.steering.subtract(force);
   }
 
-  move() {
-    this.limitVelocityAngular();
-    this.velocity.add(this.acceleration);
-    this.limitVelocityLinear();
+  move(dt) {
+    this.acceleration = Vector2.scalarMultiply(this.steering, dt);
+    this.limitVelocityAngular(dt);
+    this.velocity.add(Vector2.scalarMultiply(this.acceleration, dt));
+    this.limitVelocityLinear(dt);
+    this.position.add(this.velocity);
   }
 
-  limitVelocityAngular() {
+  limitVelocityAngular(dt) {
     let directionOld = this.velocity.direction;
     let directionDelta =
       180 -
@@ -125,8 +140,21 @@ class Particle {
       }
     }
   }
+
   limitVelocityLinear() {
+    // this.logIfZero(this.velocity.magnitude);
     this.velocity.magnitude = sigmoid(this.velocity.magnitude);
+
+    // this.velocity.magnitude = clamp(this.velocity.magnitude, 5, 6)
+
+    // if (this.velocity.magnitude < Particle.minSpeed) {
+    //   this.velocity.toUnitVector();
+    //   this.velocity.scalarMultiply(5);
+    // }
+    // if (this.velocity.magnitude > Particle.maxSpeed) {
+    //   this.velocity = Vector2.divide(this.velocity, this.velocity.magnitude);
+    //   this.velocity.scalarMultiply(Particle.maxSpeed);
+    // }
   }
 
   connect(particle) {
@@ -138,21 +166,22 @@ class Particle {
     this.ctx.stroke();
   }
 
-  update() {
+  update(dt) {
     this.acceleration.reset();
-    this.acceleration.direction = this.velocity.direction;
+    this.steering.reset();
     this.colour = "#8C5523";
 
     this.getNeighbours();
+
     if (this.neighbours.length > 0) {
       this.alignment();
       this.cohesion();
       this.separation();
     }
-    this.avoidEdges();
-    this.move();
 
-    this.position.add(this.velocity);
+    this.avoidEdges();
+    this.move(dt);
+
     this.draw();
   }
 }

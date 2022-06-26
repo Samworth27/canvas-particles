@@ -1,8 +1,3 @@
-/**
- *
- * @param {r: number, theta: number} vector - 2d vector in polar form
- * @returns {{x:number, y: number}} - 2d vector in cartesian form
- */
 function polarToCartesian(r, theta) {
   return [r * Math.cos(toRadians(theta)), r * Math.sin(toRadians(theta))];
 }
@@ -44,10 +39,10 @@ class Vector2 extends Vector {
     }
   }
 
-  static scalarMultiply(vector1, number) {
+  static scale(vector1, number) {
     if (this.canOperateOn(vector1) && typeof number === "number") {
       return new Vector2(vector1.x * number, vector1.y * number);
-    }else {
+    } else {
       throw new Error("Can not operate on one or either of these objects");
     }
   }
@@ -72,8 +67,9 @@ class Vector2 extends Vector {
 
   set direction(value) {
     if (this.magnitude === 0) {
-      [this.x, this.y] = polarToCartesian(1, value);
-      this.magnitude = 0.000001;
+      throw new Error("Cannot set the direction of a vector with no magnitude");
+      // [this.x, this.y] = polarToCartesian(1, value);
+      // this.magnitude = 0.000001;
     } else {
       [this.x, this.y] = polarToCartesian(this.magnitude, value);
     }
@@ -116,10 +112,27 @@ class Vector2 extends Vector {
     }
   }
 
-  scalarMultiply(number){
+  normalise() {
+    let magnitude = this.magnitude;
+    this.x = this.x/ magnitude;
+    this.y = this.y/ magnitude;
+  }
+
+  // scale magnitude without sin or cos
+  scale(number) {
     if (typeof number === "number") {
       this.x *= number;
       this.y *= number;
+    } else {
+      throw new Error("Cannot scale this vector");
+    }
+  }
+
+  // scale magnitude without sin or cos
+  scaleTo(number){
+    if(typeof number === "number"){
+      let magnitude = this.magnitude;
+      this.x = this.x * number / magnitude;
     }
   }
 
@@ -133,8 +146,8 @@ class Vector2 extends Vector {
 
   toUnitVector() {
     if (this.magnitude > 1) {
-      this.x / this.magnitude;
-      this.y / this.magnitude;
+      this.x /= this.magnitude;
+      this.y /= this.magnitude;
     }
   }
 
@@ -144,6 +157,6 @@ class Vector2 extends Vector {
   }
 }
 
-Vector2.prototype.toString = () => "Vector2";
+// Vector2.prototype.toString = () => "Vector2";
 
 export default Vector2;
