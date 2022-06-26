@@ -64,6 +64,7 @@ class Boid extends Particle {
     velocity.direction = Math.random() * 360;
 
     super(container, id, position, velocity, size, colour, context);
+    
     this.forces = {
       cohesion: new Vector2(),
       alignment: new Vector2(),
@@ -74,8 +75,12 @@ class Boid extends Particle {
         this.separation.reset();
       },
       sumOfAll: function () {
-        return this.cohesion.add(this.alignment.add(this.separation));
-      }
+        let sum = new Vector2();
+        sum.add(this.cohesion);
+        sum.add(this.alignment);
+        sum.add(this.separation);
+        return sum;
+      },
     };
   }
 
