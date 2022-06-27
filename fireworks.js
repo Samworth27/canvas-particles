@@ -1,5 +1,5 @@
 import Vector2 from './modules/Vector2.js';
-import Firework, {FireworkOppositeColours} from './modules/Firework.js';
+import Firework, {FireworkOppositeColours, FireworkTriadColours} from './modules/Firework.js';
 import {HSLA} from './modules/ColourString.js';
 
 window.Vector2 = Vector2
@@ -20,6 +20,15 @@ function init() {
   let colour2 = new HSLA(colour1.hue + 180 % 360, 100, 50, 1)
   let colours = [colour1,colour2];
   particlesArray.push( new FireworkOppositeColours(particlesArray,300,screenCenter.x,screenCenter.y,ctx));
+}
+
+window.onclick = (event) => {
+  // new Firework(container, options, context)
+  // options = {
+  //  count: 300,
+  //  position: new Vector2(event.x,event.y)
+  // }
+  particlesArray.push( new FireworkTriadColours(particlesArray,300,event.x,event.y,ctx));
 }
 
 
