@@ -9,6 +9,7 @@ class Particle {
     position,
     velocity,
     size,
+    mass,
     colour,
     context,
     lifespan = Infinity
@@ -25,6 +26,10 @@ class Particle {
     this.age = 0;
     Particle.instances.push(this);
     this.instances = [];
+    this.dragCoefficient = 5;
+    this.area = (Math.PI * this.size * this.size) / 1000;
+    this.airDensity = 1.1;
+    this.mass = mass;
   }
 
   logIfZero(...args) {
@@ -53,29 +58,49 @@ class Particle {
     this.context.fill();
   }
 
-  applyGravity(dt, factor = 0) {
-    this.acceleration.y += factor * dt * 0.001;
+  applyGravity() {
+    this.acceleration.y += .98;
   }
-  applyFriction(dt, factor = 0) {
-    this.velocity.divide(1 + (factor * dt) / 1000);
-  }
-  applyFrictionNew(dt, factor = 0) {
+
+  applyFriction() {
+    let x =
+      -0.5 *
+        this.dragCoefficient *
+        this.area *
+        this.airDensity *
+        this.velocity.x *
+        this.velocity.x *
+        (this.velocity.x / Math.abs(this.velocity.x));
+    let y =
+      -0.5 *
+      this.dragCoefficient *
+      this.area *
+      this.velocity.y *
+      this.velocity.y *
+      (this.velocity.y / Math.abs(this.velocity.y));
+    // let friction = new Vector2(x, y);
     let friction = this.velocity.clone();
-    friction.scale(friction.magnitude);
-    friction.scale(-0.1)
-    this.logIfZero(friction);
-    this.velocity.add(friction);
+    friction.magnitude *= friction.magnitude;
+    friction.magnitude *= -this.dragCoefficient * this.area * this.airDensity
+    friction.magnitude /= 2 * this.mass
+    this.acceleration.add(friction);
   }
+
   applyAcceleration(dt) {
-    this.velocity.add(this.acceleration);
+    let acc = this.acceleration.clone();
+    acc.scale(dt / 1000);
+    this.velocity.add(acc);
   }
   applyVelocity(dt) {
-    this.position.add(this.velocity);
+    let vel = this.velocity.clone();
+    vel.scale(dt / 10);
+
+    this.position.add(vel);
   }
 
   move(dt) {
-    this.applyGravity(dt);
-    this.applyFriction(dt);
+    this.applyGravity();
+    this.applyFriction();
     this.applyAcceleration(dt);
     this.applyVelocity(dt);
   }
