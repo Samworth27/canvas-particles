@@ -9,7 +9,7 @@ class BoidsContainer {
   static minSpeed = 1;
   static maxTurn = 5;
   static buffer = 10;
-  static perception = 50;
+  static perception = 200;
   static crowding = 20;
   static separationFactor = 10;
   static cohesionFactor = 5;
@@ -64,7 +64,7 @@ class Boid extends Particle {
     velocity.direction = Math.random() * 360;
 
     super(container, id, position, velocity, size, colour, context);
-    
+
     this.forces = {
       cohesion: new Vector2(),
       alignment: new Vector2(),
@@ -86,6 +86,19 @@ class Boid extends Particle {
 
   draw() {
     super.draw();
+    this.executeIfZero(()=>{
+      this.context.beginPath();
+      this.context.arc(
+        this.position.x,
+        this.position.y,
+        this.size*10,
+        0,
+        Math.PI * 2,
+        false
+      );
+      this.context.strokeStyle = this.colour;
+      this.context.stroke();
+    })
     this.context.moveTo(this.position.x, this.position.y);
     this.context.strokeStyle = "black";
     this.context.lineTo(
@@ -125,19 +138,23 @@ class Boid extends Particle {
 
   getNeighbours() {
     this.neighbours = [];
-    for (let i = 0; i < Particle.instances.length; i++) {
-      if (this != Particle.instances[i]) {
-        if (
-          this.position.distanceTo(Particle.instances[i].position) <
-          Particle.perception
-        ) {
-          this.neighbours.push(Particle.instances[i]);
+    for (let i = 0; i < this.container.instances.length; i++) {
+      if (this != this.container.instances[i]) {
+        let diff = this.position.distanceTo(
+          this.container.instances[i].position
+        );
+        if (diff < this.perception) {
+          this.neighbours.push(this.container.instances[i]);
         }
       }
     }
   }
 
-  alignment() {}
+  alignment() {
+    this.neighbours.forEach(function (neighbour) {
+      this.forces.alignment.add(neighbour.velocity);
+    });
+  }
 
   cohesion() {}
   separation() {}
@@ -177,8 +194,12 @@ class Boid extends Particle {
 
   update(dt) {
     this.acceleration.reset();
-    // this.forces.reset();
+    this.forces.reset();
+    //
+    this.getNeighbours();
+    this.alignment();
     this.avoidEdges();
+    //
     this.move(dt);
     this.draw();
   }

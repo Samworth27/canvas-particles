@@ -33,6 +33,12 @@ class Particle {
     }
   }
 
+  executeIfZero(callback,...args){
+    if (this.id === 0) {
+      callback(...args);
+    }
+  }
+
   draw() {
     this.context.beginPath();
     this.context.arc(
@@ -45,6 +51,7 @@ class Particle {
     );
     this.context.fillStyle = this.colour;
     this.context.fill();
+
   }
 
   applyGravity(dt, factor = 0) {
