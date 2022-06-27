@@ -63,7 +63,7 @@ class Boid extends Particle {
     velocity.magnitude = 1;
     velocity.direction = Math.random() * 360;
 
-    super(container, id, position, velocity, size, colour, context);
+    super(container, id, position, velocity, size,10, colour, context);
 
     this.forces = {
       cohesion: new Vector2(),
@@ -163,10 +163,8 @@ class Boid extends Particle {
 
   move(dt) {
     this.acceleration.add(this.forces.sumOfAll());
-    this.limitVelocityLinear(dt);
-    this.limitVelocityAngular(dt);
+    this.applyFriction();
     this.velocity.add(this.acceleration);
-    this.applyFriction(dt);
     this.position.add(this.velocity);
   }
 
@@ -196,10 +194,6 @@ class Boid extends Particle {
     this.context.moveTo(this.position.x, this.position.y);
     this.context.lineTo(particle.position.x, particle.position.y);
     this.context.stroke();
-  }
-
-  applyFriction(dt){
-    super.applyFrictionNew(dt,1);
   }
 
   update(dt) {
