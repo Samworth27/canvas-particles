@@ -5,19 +5,19 @@ const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 const sigmoid = (x) => 2 / (1 + Math.E ** -x);
 
 class BoidsContainer {
-  static maxSpeed = 5;
-  static minSpeed = 1;
-  static maxTurn = 5;
+  static maxSpeed = 1;
+  static minSpeed = 5;
+  static maxTurn = 0.5;
   static buffer = 10;
   static perception = 200;
   static crowding = 20;
   static separationFactor = 10;
-  static cohesionFactor = 5;
-  static alignmentFactor = 10;
-  static avoidanceFactor = 100;
+  static cohesionFactor = 1;
+  static alignmentFactor = 1;
+  static avoidanceFactor = 1;
 
   constructor(canvas, context, options = {}) {
-    // options
+    console.log(options.perception || BoidsContainer.perception);
     this.maxSpeed = options.maxSpeed || BoidsContainer.maxSpeed;
     this.minSpeed = options.minSpeed || BoidsContainer.minSpeed;
     this.maxTurn = options.maxTurn || BoidsContainer.maxTurn;
@@ -86,19 +86,19 @@ class Boid extends Particle {
 
   draw() {
     super.draw();
-    this.executeIfZero(()=>{
+    this.executeIfZero(() => {
       this.context.beginPath();
       this.context.arc(
         this.position.x,
         this.position.y,
-        this.size*10,
+        this.size * 10,
         0,
         Math.PI * 2,
         false
       );
       this.context.strokeStyle = this.colour;
       this.context.stroke();
-    })
+    });
     this.context.moveTo(this.position.x, this.position.y);
     this.context.strokeStyle = "black";
     this.context.lineTo(
@@ -143,7 +143,8 @@ class Boid extends Particle {
         let diff = this.position.distanceTo(
           this.container.instances[i].position
         );
-        if (diff < this.perception) {
+
+        if (diff < this.container.perception) {
           this.neighbours.push(this.container.instances[i]);
         }
       }
@@ -151,8 +152,9 @@ class Boid extends Particle {
   }
 
   alignment() {
-    this.neighbours.forEach(function (neighbour) {
+    this.neighbours.forEach((neighbour) => {
       this.forces.alignment.add(neighbour.velocity);
+      this.forces.alignment.divide(this.neighbours.length);
     });
   }
 
@@ -161,27 +163,31 @@ class Boid extends Particle {
 
   move(dt) {
     this.acceleration.add(this.forces.sumOfAll());
-    this.limitVelocityAngular(dt);
-    this.velocity.add(Vector2.scale(this.acceleration, dt));
     this.limitVelocityLinear(dt);
+    this.limitVelocityAngular(dt);
+    this.velocity.add(this.acceleration);
+    this.applyFriction(dt);
     this.position.add(this.velocity);
   }
 
   limitVelocityAngular(dt) {
-    let directionOld = this.velocity.direction;
+    let velocityDirection = this.velocity.direction;
+    let accelerationDirection = this.acceleration.direction;
     let directionDelta =
-      180 -
-      ((180 - this.acceleration.direction + this.velocity.direction) % 360);
-    if (Math.abs(directionDelta) > Particle.maxTurn) {
+      180 - ((180 - accelerationDirection + velocityDirection) % 360);
+    if (Math.abs(directionDelta) > this.container.maxTurn) {
       if (directionDelta > 0) {
-        this.acceleration.direction = directionOld + Particle.maxTurn;
+        accelerationDirection = velocityDirection + this.container.maxTurn;
       } else {
-        this.acceleration.direction = directionOld - Particle.maxTurn;
+        this.acceleration.direction =
+          velocityDirection - this.container.maxTurn;
       }
     }
   }
 
-  limitVelocityLinear() {}
+  limitVelocityLinear() {
+    this.velocity.magnitude = clamp(this.velocity.magnitude, 0.1, 5);
+  }
 
   connect(particle) {
     this.context.strokeStyle = "rgba(140,140,31,1)";
@@ -190,6 +196,10 @@ class Boid extends Particle {
     this.context.moveTo(this.position.x, this.position.y);
     this.context.lineTo(particle.position.x, particle.position.y);
     this.context.stroke();
+  }
+
+  applyFriction(dt){
+    super.applyFrictionNew(dt,1);
   }
 
   update(dt) {

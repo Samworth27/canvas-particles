@@ -67,9 +67,9 @@ class Vector2 extends Vector {
 
   set direction(value) {
     if (this.magnitude === 0) {
-      throw new Error("Cannot set the direction of a vector with no magnitude");
-      // [this.x, this.y] = polarToCartesian(1, value);
-      // this.magnitude = 0.000001;
+      // throw new Error("Cannot set the direction of a vector with no magnitude");
+      [this.x, this.y] = polarToCartesian(1, value);
+      this.magnitude = 0.000001;
     } else {
       [this.x, this.y] = polarToCartesian(this.magnitude, value);
     }
@@ -149,6 +149,10 @@ class Vector2 extends Vector {
       this.x /= this.magnitude;
       this.y /= this.magnitude;
     }
+  }
+
+  clone(){
+    return new Vector2(this.x, this.y);
   }
 
   reset() {

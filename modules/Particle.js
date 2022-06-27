@@ -1,4 +1,4 @@
-import Vector2 from './Vector2.js';
+import Vector2 from "./Vector2.js";
 
 class Particle {
   static instances = [];
@@ -27,13 +27,13 @@ class Particle {
     this.instances = [];
   }
 
-  logIfZero(value) {
+  logIfZero(...args) {
     if (this.id === 0) {
-      console.log(value);
+      console.log(...args);
     }
   }
 
-  executeIfZero(callback,...args){
+  executeIfZero(callback, ...args) {
     if (this.id === 0) {
       callback(...args);
     }
@@ -51,7 +51,6 @@ class Particle {
     );
     this.context.fillStyle = this.colour;
     this.context.fill();
-
   }
 
   applyGravity(dt, factor = 0) {
@@ -59,6 +58,13 @@ class Particle {
   }
   applyFriction(dt, factor = 0) {
     this.velocity.divide(1 + (factor * dt) / 1000);
+  }
+  applyFrictionNew(dt, factor = 0) {
+    let friction = this.velocity.clone();
+    friction.scale(friction.magnitude);
+    friction.scale(-0.1)
+    this.logIfZero(friction);
+    this.velocity.add(friction);
   }
   applyAcceleration(dt) {
     this.velocity.add(this.acceleration);
