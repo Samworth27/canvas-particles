@@ -84,29 +84,7 @@ class Boid extends Particle {
     };
   }
 
-  draw() {
-    super.draw();
-    this.executeIfZero(() => {
-      this.context.beginPath();
-      this.context.arc(
-        this.position.x,
-        this.position.y,
-        this.size * 10,
-        0,
-        Math.PI * 2,
-        false
-      );
-      this.context.strokeStyle = this.colour;
-      this.context.stroke();
-    });
-    this.context.moveTo(this.position.x, this.position.y);
-    this.context.strokeStyle = "black";
-    this.context.lineTo(
-      this.position.x + this.velocity.x * (this.size / 2),
-      this.position.y + this.velocity.y * (this.size / 2)
-    );
-    this.context.stroke();
-  }
+
 
   avoidEdges() {
     // if (
@@ -149,6 +127,13 @@ class Boid extends Particle {
         }
       }
     }
+  }
+
+  getForces() {
+    this.forces.reset();
+    this.alignment();
+    this.cohesion();
+    this.separation();
   }
 
   alignment() {
@@ -196,6 +181,30 @@ class Boid extends Particle {
     this.velocity.magnitude = clamp(this.velocity.magnitude, 0.1, 5);
   }
 
+  draw() {
+    super.draw();
+    this.executeIfZero(() => {
+      this.context.beginPath();
+      this.context.arc(
+        this.position.x,
+        this.position.y,
+        this.size * 10,
+        0,
+        Math.PI * 2,
+        false
+      );
+      this.context.strokeStyle = this.colour;
+      this.context.stroke();
+    });
+    this.context.moveTo(this.position.x, this.position.y);
+    this.context.strokeStyle = "black";
+    this.context.lineTo(
+      this.position.x + this.velocity.x * (this.size / 2),
+      this.position.y + this.velocity.y * (this.size / 2)
+    );
+    this.context.stroke();
+  }
+
   connect(particle) {
     this.context.strokeStyle = "rgba(140,140,31,1)";
     this.context.lineWidth = 1;
@@ -207,10 +216,10 @@ class Boid extends Particle {
 
   update(dt) {
     this.acceleration.reset();
-    this.forces.reset();
+    
     //
     this.getNeighbours();
-    this.alignment();
+    this.getForces();
     this.avoidEdges();
     //
     this.move(dt);
