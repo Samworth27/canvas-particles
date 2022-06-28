@@ -63,7 +63,7 @@ class Boid extends Particle {
     velocity.magnitude = 1;
     velocity.direction = Math.random() * 360;
 
-    super(container, id, position, velocity, size,10, colour, context);
+    super(container, id, position, velocity, size, 10, colour, context);
 
     this.forces = {
       cohesion: new Vector2(),
@@ -83,8 +83,6 @@ class Boid extends Particle {
       },
     };
   }
-
-
 
   avoidEdges() {
     // if (
@@ -130,7 +128,7 @@ class Boid extends Particle {
   }
 
   getForces() {
-    this.forces.reset();
+    
     this.alignment();
     this.cohesion();
     this.separation();
@@ -147,11 +145,23 @@ class Boid extends Particle {
     let averagePosition = new Vector2();
     this.neighbours.forEach((neighbour) => {
       averagePosition.add(neighbour.position);
-    })
+    });
     averagePosition.divide(this.neighbours.length);
     this.forces.cohesion = Vector2.subtract(averagePosition, this.position);
   }
-  separation() {}
+  separation() {
+    this.neighbours.forEach((neighbour) => {
+      let diff = this.position.distanceTo(neighbour.position);
+      if (diff < this.container.crowding) {
+        let impulse = Vector2.subtract(this.position, neighbour.position);
+        impulse.scale(0.5);
+        this.forces.separation.add(impulse);
+        impulse = impulse.clone();
+        impulse.scale(-1);
+        neighbour.forces.separation.add(impulse);
+      }
+    });
+  }
 
   move(dt) {
     this.acceleration.add(this.forces.sumOfAll());
@@ -215,8 +225,8 @@ class Boid extends Particle {
   }
 
   update(dt) {
-    this.acceleration.reset();
     
+
     //
     this.getNeighbours();
     this.getForces();
@@ -224,6 +234,8 @@ class Boid extends Particle {
     //
     this.move(dt);
     this.draw();
+    this.acceleration.reset();
+    this.forces.reset();
   }
 }
 
