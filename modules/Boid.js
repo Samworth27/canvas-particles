@@ -7,17 +7,16 @@ const sigmoid = (x) => 2 / (1 + Math.E ** -x);
 class BoidsContainer {
   static maxSpeed = 1;
   static minSpeed = 5;
-  static maxTurn = 0.5;
+  static maxTurn = 0.001;
   static buffer = 10;
   static perception = 200;
-  static crowding = 20;
-  static separationFactor = 10;
-  static cohesionFactor = 1;
-  static alignmentFactor = 1;
+  static crowding = 30;
+  static separationFactor = 0.03;
+  static cohesionFactor = 0.01;
+  static alignmentFactor = 0.5;
   static avoidanceFactor = 1;
 
   constructor(canvas, context, options = {}) {
-    console.log(options.perception || BoidsContainer.perception);
     this.maxSpeed = options.maxSpeed || BoidsContainer.maxSpeed;
     this.minSpeed = options.minSpeed || BoidsContainer.minSpeed;
     this.maxTurn = options.maxTurn || BoidsContainer.maxTurn;
@@ -69,18 +68,6 @@ class Boid extends Particle {
       cohesion: new Vector2(),
       alignment: new Vector2(),
       separation: new Vector2(),
-      reset: function () {
-        this.cohesion.reset();
-        this.alignment.reset();
-        this.separation.reset();
-      },
-      sumOfAll: function () {
-        let sum = new Vector2();
-        sum.add(this.cohesion);
-        sum.add(this.alignment);
-        sum.add(this.separation);
-        return sum;
-      },
     };
   }
 
@@ -128,7 +115,6 @@ class Boid extends Particle {
   }
 
   getForces() {
-    
     this.alignment();
     this.cohesion();
     this.separation();
@@ -164,12 +150,27 @@ class Boid extends Particle {
   }
 
   move(dt) {
-    this.acceleration.add(this.forces.sumOfAll());
+    let forces = this.sumForces(this.forces)
+    this.acceleration.add(forces);
     this.applyFriction();
     this.limitVelocityAngular();
     this.velocity.add(this.acceleration);
     this.limitVelocityLinear();
     this.position.add(this.velocity);
+  }
+
+  sumForces(forces) {
+    let sum = new Vector2();
+    // forces.cohesion.normalise();
+    // forces.alignment.normalise();
+    // forces.separation.normalise();
+    forces.cohesion.scale(this.container.cohesionFactor);
+    forces.alignment.scale(this.container.alignmentFactor);
+    forces.separation.scale(this.container.separationFactor);
+    sum.add(forces.cohesion);
+    sum.add(forces.alignment);
+    sum.add(forces.separation);
+    return sum
   }
 
   limitVelocityAngular(dt) {
@@ -194,11 +195,24 @@ class Boid extends Particle {
   draw() {
     super.draw();
     this.executeIfZero(() => {
+      //draw perception
       this.context.beginPath();
       this.context.arc(
         this.position.x,
         this.position.y,
-        this.size * 10,
+        this.container.perception,
+        0,
+        Math.PI * 2,
+        false
+      );
+      this.context.strokeStyle = this.colour;
+      this.context.stroke();
+      // draw crowding
+      this.context.beginPath();
+      this.context.arc(
+        this.position.x,
+        this.position.y,
+        this.container.crowding,
         0,
         Math.PI * 2,
         false
@@ -224,9 +238,13 @@ class Boid extends Particle {
     this.context.stroke();
   }
 
-  update(dt) {
-    
+  resetForces() {
+    this.forces.separation.reset();
+    this.forces.cohesion.reset();
+    this.forces.alignment.reset();
+  }
 
+  update(dt) {
     //
     this.getNeighbours();
     this.getForces();
@@ -235,7 +253,7 @@ class Boid extends Particle {
     this.move(dt);
     this.draw();
     this.acceleration.reset();
-    this.forces.reset();
+    this.resetForces();
   }
 }
 
