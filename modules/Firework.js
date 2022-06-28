@@ -9,7 +9,7 @@ class FireworkParticle extends Particle {
     let velocity = new Vector2();
     let alpha = 10;
     let delta = 360 / alpha;
-    let variation = 0;
+    let variation = 20;
     let mass = 0.02;
     velocity.magnitude = Math.random()*10;
     velocity.direction = initialAngle + (Math.ceil(Math.random() * alpha))*delta + (Math.random()*variation - variation*0.5);
