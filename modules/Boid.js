@@ -154,17 +154,26 @@ class Boid extends Particle {
   alignment() {
     this.neighbours.forEach((neighbour) => {
       this.forces.alignment.add(neighbour.velocity);
-      this.forces.alignment.divide(this.neighbours.length);
     });
+    this.forces.alignment.divide(this.neighbours.length);
   }
 
-  cohesion() {}
+  cohesion() {
+    let averagePosition = new Vector2();
+    this.neighbours.forEach((neighbour) => {
+      averagePosition.add(neighbour.position);
+    })
+    averagePosition.divide(this.neighbours.length);
+    this.forces.cohesion = Vector2.subtract(averagePosition, this.position);
+  }
   separation() {}
 
   move(dt) {
     this.acceleration.add(this.forces.sumOfAll());
     this.applyFriction();
+    this.limitVelocityAngular();
     this.velocity.add(this.acceleration);
+    this.limitVelocityLinear();
     this.position.add(this.velocity);
   }
 
