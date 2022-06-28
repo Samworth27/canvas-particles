@@ -2,17 +2,17 @@ import Particle from "./Particle.js";
 import { HSLA } from "./ColourString.js";
 
 class FireworkParticle extends Particle {
-  static initialAngle = Math.random() * 360;
-  constructor(container, id, colour, lifespan, x, y, context) {
+  // static initialAngle = Math.random() * 360;
+  constructor(container, id, colour, lifespan, initialAngle, x, y, context) {
     let size = 1;
     let position = new Vector2(x, y);
     let velocity = new Vector2();
-    let alpha = 50;
+    let alpha = 10;
     let delta = 360 / alpha;
-    let variation = 10;
-    let mass = 0.01;
+    let variation = 0;
+    let mass = 0.02;
     velocity.magnitude = Math.random()*10;
-    velocity.direction = FireworkParticle.initialAngle + (Math.ceil(Math.random() * alpha))*delta + (Math.random()*variation - variation*0.5);
+    velocity.direction = initialAngle + (Math.ceil(Math.random() * alpha))*delta + (Math.random()*variation - variation*0.5);
     
     super(container, id, position, velocity, size,mass, colour, context, lifespan);
   }
@@ -56,7 +56,7 @@ class FireworkSparkle extends Particle {
     let velocity = new Vector2();
     velocity.magnitude = 0.5;
     velocity.direction = Math.random() * 360;
-    let mass = 0.00001;
+    let mass = 0.000001;
    
 
     super(container, id, position, velocity, size,mass, colour, context, lifespan);
@@ -77,15 +77,18 @@ class FireworkContainer {
   constructor(colours, container, count, ...args) {
     this.instances = [];
     this.container = container;
+    let initialAngle = Math.random() * 360;
     for (let i = 0; i < count; i++) {
       let lifespan = Math.random()+3;
       let colour = colours[Math.floor(Math.random() * colours.length)];
+      
       this.instances.push(
         new FireworkParticle(
           this.instances,
           this.instances.length,
           colour,
           lifespan,
+          initialAngle,
           ...args
         )
       );
