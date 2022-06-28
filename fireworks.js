@@ -39,7 +39,9 @@ function animate(tick) {
   let dt = tick - previousTick;
   // console.log(`fps: ${Math.round(1000/dt)}`)
   
-  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  // ctx.clearRect(0, 0, innerWidth, innerHeight);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillRect(0, 0, innerWidth, innerHeight);
   for (let i = 0; i < particlesArray.length; i++) {
     particlesArray[i].update(dt);
   }
