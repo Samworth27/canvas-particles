@@ -19,7 +19,7 @@ function init() {
   let colour1 = new HSLA(Math.floor(Math.random()*360),100,50,1)
   let colour2 = new HSLA(colour1.hue + 180 % 360, 100, 50, 1)
   let colours = [colour1,colour2];
-  particlesArray.push( new FireworkOppositeColours(particlesArray,300,screenCenter.x,screenCenter.y,ctx));
+  particlesArray.push( new FireworkOppositeColours(particlesArray,200,screenCenter.x,screenCenter.y,ctx));
 }
 
 window.onclick = (event) => {
@@ -28,7 +28,7 @@ window.onclick = (event) => {
   //  count: 300,
   //  position: new Vector2(event.x,event.y)
   // }
-  particlesArray.push( new FireworkTriadColours(particlesArray,300,event.x,event.y,ctx));
+  particlesArray.push( new FireworkTriadColours(particlesArray,200,event.x,event.y,ctx));
 }
 
 
