@@ -73,6 +73,7 @@ let lastParticles = [
   new ParticleDescriptor(10, new HSLA(0, 50, 100, 1), "circle", 15, "sin"),
   new ParticleDescriptor(10, new HSLA(270, 50, 50, 1), "circle", 15, "sin-alt"),
   new ParticleDescriptor(10, new HSLA(270, 50, 50, 1), "circle", 15, "sin-alt"),
+  new ParticleDescriptor(10, new HSLA(0, 50, 100, 1), "circle", 15, "sin"),
 ];
 
 let lastOptions = {
