@@ -1,15 +1,3 @@
-import Particle from "./Particle.js";
-import Vector2 from "./Vector2";
-
-class Particle{
-  constructor(position, velocity, size,color, shape, lifetime){
-    
-  }
-}
-
-class Emitter {
-  constructor(Particle, position){
-
-  }
-
-}
+export {Particle} from './Emitter/Particle.js';
+export {ParticleDescriptor} from './Emitter/ParticleDescriptor.js';
+export {Emitter} from './Emitter/Emitter.js';

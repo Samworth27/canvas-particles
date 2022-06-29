@@ -1,4 +1,4 @@
-import Vector2 from './modules/Vector2.js';
+import {Vector2} from './modules/Vectors.js';
 import Firework, {FireworkOppositeColours, FireworkTriadColours} from './modules/Firework.js';
 import {HSLA} from './modules/ColourString.js';
 

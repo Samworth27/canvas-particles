@@ -1,5 +1,5 @@
 import Particle from "./Particle.js";
-import Vector2 from "./Vector2.js";
+import {Vector2} from "./Vectors.js";
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 const sigmoid = (x) => 2 / (1 + Math.E ** -x);
