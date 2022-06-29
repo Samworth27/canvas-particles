@@ -8,3 +8,8 @@ A collection of experiments while learning HTML canvas and JavaScript built arou
   - TODO:
     - Find out why the boids prefer a clockwise rotation
     - Add ability to adjust parameters on the fly
+- [Particle V2](https://samworth27.github.io/canvas-particles/emitter.html)
+  - New system built from emitters, particles and reusable particle descriptors
+  - TODO: 
+    - continue documenting emitter and particle options
+    - Fix issue with color settings slowing down the system
