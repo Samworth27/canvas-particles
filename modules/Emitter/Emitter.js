@@ -30,7 +30,7 @@ class Emitter {
     this.pool = [];
 
     // define direction related properties
-    this.directionMode = options.direction || "random";
+    this.directionMode = options.directionMode || "random";
     switch (this.directionMode) {
       case "set":
         this.direction = options.direction || 0;
@@ -85,7 +85,7 @@ class Emitter {
       descriptor = this.descriptor;
     } else {
       switch (this.selectionMode) {
-        case "alternate":
+        case "sequential":
           descriptor = this.descriptor[this.descriptorIndex];
           this.descriptorIndex =
             (this.descriptorIndex + 1) % this.descriptor.length;
@@ -164,9 +164,9 @@ class Emitter {
         this.pool.push(this.particles.splice(index, 1)[0]);
       }
     });
-    console.log(
-      `FPS: ${window.fps} | particles: ${this.particles.length} | pool: ${this.pool.length}`
-    );
+    // console.log(
+    //   `FPS: ${window.fps} | particles: ${this.particles.length} | pool: ${this.pool.length}`
+    // );
   }
 
   get isDead() {
