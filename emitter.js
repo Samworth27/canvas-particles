@@ -1,46 +1,60 @@
-import Vector2 from './modules/Vector2.js';
-import Emitter from './modules/emitter.js';
-import {HSLA} from './modules/ColourString.js';
+import { Vector2 } from "./modules/Vectors.js";
+import { Emitter, ParticleDescriptor } from "./modules/Emitter.js";
+import { HSLA } from "./modules/ColourString.js";
+import { createCanvas } from "./modules/Canvas.js";
 
-window.Vector2 = Vector2
-window.Firework = Firework
-
-const canvas = document.querySelector("#canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-const buffer = 100;
-const screenCenter = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-let particlesArray = [];
-
-function init() {
-  particlesArray = [];
-  window.particles = particlesArray
-  let emitter = new Emitter();
-}
-
-window.onclick = (event) => {
-
-}
-
-
+let FPSHistory = [];
 let previousTick = 0;
-
-function animate(tick) {
-  tick = tick || 1
-  let dt = tick - previousTick;
-  // console.log(`fps: ${Math.round(1000/dt)}`)
-  
-  // ctx.clearRect(0, 0, innerWidth, innerHeight);
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
-  ctx.fillRect(0, 0, innerWidth, innerHeight);
-  for (let i = 0; i < particlesArray.length; i++) {
-    particlesArray[i].update(dt);
+function animate(canvas, tick = 15) {
+  canvas.ctx.clearRect(0, 0, innerWidth, innerHeight);
+  let dt = Number(((tick - previousTick) / 1000).toPrecision(6));
+  let fps = Number((1000 / (dt * 1000)).toPrecision(2));
+  FPSHistory.push(fps);
+  if (FPSHistory.length > 60) {
+    FPSHistory.splice(0, 1);
   }
-  requestAnimationFrame(animate);
-  previousTick = tick
+  window.fps = Math.round(FPSHistory.reduce((a, b) => a + b) / FPSHistory.length);
+  canvas.draw(dt);
+  previousTick = tick;
+  requestAnimationFrame((tick) => animate(canvas, tick));
 }
 
+const canvas = createCanvas();
 
-init();
-animate();
+let particle = new ParticleDescriptor(
+  10,
+  new HSLA(90, 50, 50, 1),
+  "circle",
+  20,
+  "normal"
+);
+let particle1 = new ParticleDescriptor(
+  10,
+  new HSLA(90, 50, 50, 1),
+  "circle",
+  20,
+  "sin"
+);
+let particle2 = new ParticleDescriptor(
+  10,
+  new HSLA(270, 50, 50, 1),
+  "circle",
+  20,
+  "alt-sin"
+);
+
+let particles = [particle1, particle2];
+
+let options = {
+  direction: "spin",
+  spinSpeed: 3400,
+  selectionMode: "random",
+  linkMode: "all",
+  // colourMode: "cycle",
+  // colourCycleSpeed: 360
+};
+let emitter = new Emitter(canvas, particle, new Vector2(200, 300), 84, 0.5,options);
+
+canvas.emitters.push(emitter);
+
+animate(canvas);
