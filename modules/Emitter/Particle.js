@@ -1,4 +1,4 @@
-import {Vector2} from './../Vectors.js'
+import { Vector2 } from "./../Vectors.js";
 
 class Particle {
   constructor(descriptor, position, velocity, canvas) {
@@ -7,11 +7,10 @@ class Particle {
     this.movement = descriptor.movement;
     this.acceleration = new Vector2();
     this.size = descriptor.size;
-    this.colour = descriptor.colour;
+    this.colour = descriptor.colour.clone();
     this.shape = descriptor.shape;
     this.lifespan = descriptor.lifespan;
     this.canvas = canvas;
-    this.forces = [];
     this.age = 0;
     this.links = [];
 
@@ -35,11 +34,10 @@ class Particle {
     this.movement = descriptor.movement;
     this.acceleration = new Vector2();
     this.size = descriptor.size;
-    this.colour = descriptor.colour;
+    this.colour = descriptor.colour.clone();
     this.shape = descriptor.shape;
     this.lifespan = descriptor.lifespan;
     this.canvas = canvas;
-    this.forces = [];
     this.age = 0;
     this.links = [];
 
@@ -57,15 +55,21 @@ class Particle {
     }
   }
 
-  
-
   getOlder(dt) {
     this.age += dt;
     this.colour.alpha = 1 - this.age / this.lifespan;
   }
 
-  move(dt) {
+  applyAcceleration(dt) {
     this.velocity.add(this.acceleration.scale(dt));
+  }
+
+  applyVelocity(dt) {
+    this.position.add(this.velocity.clone().scale(dt * 100));
+  }
+
+  move(dt) {
+    this.applyAcceleration(dt);
 
     // special movement cases
     switch (this.movement) {
@@ -82,7 +86,7 @@ class Particle {
         break;
     }
 
-    this.position.add(this.velocity.clone().scale(dt * 100));
+    this.applyVelocity(dt);
   }
 
   draw() {
@@ -112,5 +116,6 @@ class Particle {
     return this.age > this.lifespan;
   }
 }
+
 export default Particle;
-export {Particle};
+export { Particle };
