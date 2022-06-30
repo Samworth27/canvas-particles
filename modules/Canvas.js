@@ -18,7 +18,11 @@ function createCanvas() {
       emitter.update(dt);
       if (emitter.isDead) {
         console.log("Dead emitter");
-        this.emitters.splice(this.emitters.indexOf(emitter), 1);
+        let deadEmitter = this.emitters.splice(
+          this.emitters.indexOf(emitter),
+          1
+        )[0];
+        deadEmitter = null;
       }
     });
   };
@@ -26,4 +30,4 @@ function createCanvas() {
   return canvas;
 }
 
-export {createCanvas}
+export { createCanvas };
