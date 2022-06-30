@@ -7,6 +7,7 @@ import {
 import { HSLA } from "./modules/ColourString.js";
 import { createCanvas } from "./modules/Canvas.js";
 
+const mousePosition = new Vector2();
 let FPSHistory = [];
 let previousTick = 0;
 function animate(canvas, tick = 15) {
@@ -39,7 +40,7 @@ let fibOptions = {
   spinSpeed: 3400,
   linkMode: "all",
   colourMode: "cycle",
-  colourCycleSpeed: 3410
+  colourCycleSpeed: 3410,
 };
 
 let fibEmitter = new Emitter(
@@ -96,34 +97,79 @@ let oppositeSinEmitter = new Emitter(
 // );
 
 // physics particle
-let smokeParticle = new ParticleDescriptor(
-  5,
-  new HSLA(90, 5, 10, 1),
-  "circle",
-  3,
-  "normal"
-);
-
-let smokePhysicsParticle = new PhysicsParticleDescriptor(
-  0.1,
-  0.9,
-  -1,
-  1.2,
-  smokeParticle
-);
+let smokePhysicsParticle = [
+  new PhysicsParticleDescriptor(
+    0.0001,
+    0.1,
+    -9.8,
+    1.2,
+    new ParticleDescriptor(10, new HSLA(90, 5, 10, 1), "circle", 3, "normal")
+  ),
+  new PhysicsParticleDescriptor(
+    0.001,
+    0.91,
+    -9.8,
+    1.2,
+    new ParticleDescriptor(4, new HSLA(0, 100, 50, 1), "circle", 0.5, "normal")
+  ),
+  new PhysicsParticleDescriptor(
+    0.0001,
+    0.1,
+    -9.8,
+    1.2,
+    new ParticleDescriptor(2, new HSLA(50, 100, 50, 1), "circle", 1, "normal")
+  ),
+];
 
 let physicsOptions = {
   physicsMode: "full",
-  colourMode: "random"
+  colourMode: "set",
 };
 
-let physicsEmitter = new Emitter(canvas,smokePhysicsParticle,new Vector2(innerWidth - 300, innerHeight / 2 ),300,0.2,physicsOptions)
+let physicsEmitter = new Emitter(
+  canvas,
+  smokePhysicsParticle,
+  new Vector2(innerWidth - 300, innerHeight / 2),
+  // mousePosition,
+  300,
+  0.5,
+  physicsOptions
+);
 
-
+let smokeCoverup = new Emitter(
+  canvas,
+  [
+    new PhysicsParticleDescriptor(
+      0.0001,
+      0.1,
+      -9.8,
+      1.2,
+      new ParticleDescriptor(10, new HSLA(0, 100, 50, 1), "circle", 0.3)
+    ),
+    new PhysicsParticleDescriptor(
+      0.001,
+      0.1,
+      -9.8,
+      1.2,
+      new ParticleDescriptor(10, new HSLA(60, 50, 50, 1), "circle", 0.3)
+    ),
+  ],
+  new Vector2(innerWidth - 300, innerHeight / 2),
+  // mousePosition,
+  60,
+  0.5,
+  { physicsMode: "full" }
+);
 
 canvas.emitters.push(fibEmitter);
 canvas.emitters.push(oppositeSinEmitter);
 // canvas.emitters.push(lastEmitter);
 canvas.emitters.push(physicsEmitter);
+canvas.emitters.push(smokeCoverup);
+
+// document.addEventListener("mousemove", (event) => {
+//   mousePosition.x = event.clientX;
+//   mousePosition.y = event.clientY;
+// });
 
 animate(canvas);
