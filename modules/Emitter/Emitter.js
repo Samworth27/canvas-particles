@@ -69,7 +69,8 @@ class Emitter {
   }
 
   spawnParticle(dt) {
-    let velocity = new Vector2(0, this.force);
+    let velocity = new Vector2();
+    velocity.magnitude = this.force;
     // define the particles initial direction
     switch (this.directionMode) {
       case "set":
