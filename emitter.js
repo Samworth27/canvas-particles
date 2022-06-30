@@ -1,5 +1,9 @@
 import { Vector2 } from "./modules/Vectors.js";
-import { Emitter, ParticleDescriptor } from "./modules/Emitter.js";
+import {
+  Emitter,
+  ParticleDescriptor,
+  PhysicsParticleDescriptor,
+} from "./modules/Emitter.js";
 import { HSLA } from "./modules/ColourString.js";
 import { createCanvas } from "./modules/Canvas.js";
 
@@ -27,26 +31,25 @@ let fibParticle = new ParticleDescriptor(
   10,
   new HSLA(90, 50, 50, 1),
   "circle",
-  20,
-  "normal"
+  20
 );
 
 let fibOptions = {
   directionMode: "spin",
   spinSpeed: 3400,
   linkMode: "all",
+  colourMode: "cycle",
+  colourCycleSpeed: 3410
 };
 
 let fibEmitter = new Emitter(
   canvas,
   fibParticle,
   new Vector2(200, 300),
-  84,
+  54,
   0.5,
   fibOptions
 );
-
-
 
 let oppositeSinParticles = [
   new ParticleDescriptor(10, new HSLA(0, 50, 50, 1), "circle", 15, "alt-sin"),
@@ -54,46 +57,73 @@ let oppositeSinParticles = [
 ];
 
 let oppositeSinOptions = {
-  directionMode: 'set',
+  directionMode: "set",
   direction: 90,
-  selectionMode: 'sequential',
-  linkMode: 'alternate',
-}
+  selectionMode: "sequential",
+  linkMode: "alternate",
+};
 
 let oppositeSinEmitter = new Emitter(
   canvas,
   oppositeSinParticles,
-  new Vector2(innerWidth/2, 0),
-  20,
+  new Vector2(innerWidth / 2, 0),
+  15,
   1,
   oppositeSinOptions
 );
 
-let lastParticles = [
-  new ParticleDescriptor(10, new HSLA(0, 50, 100, 1), "circle", 15, "sin"),
-  new ParticleDescriptor(10, new HSLA(270, 50, 50, 1), "circle", 15, "sin-alt"),
-  new ParticleDescriptor(10, new HSLA(270, 50, 50, 1), "circle", 15, "sin-alt"),
-  new ParticleDescriptor(10, new HSLA(0, 50, 100, 1), "circle", 15, "sin"),
-];
+// let lastParticles = [
+//   new ParticleDescriptor(10, new HSLA(0, 50, 100, 1), "circle", 15, "sin"),
+//   new ParticleDescriptor(10, new HSLA(270, 50, 50, 1), "circle", 15, "sin-alt"),
+//   new ParticleDescriptor(10, new HSLA(270, 50, 50, 1), "circle", 15, "sin-alt"),
+//   new ParticleDescriptor(10, new HSLA(0, 50, 100, 1), "circle", 15, "sin"),
+// ];
 
-let lastOptions = {
-  directionMode: 'spin',
-  spinSpeed: 360,
-  selectionMode: 'sequential',
-  linkMode: 'all'
-}
+// let lastOptions = {
+//   directionMode: "spin",
+//   spinSpeed: 360,
+//   selectionMode: "sequential",
+//   linkMode: "all",
+// };
 
-let lastEmitter = new Emitter(
-  canvas,
-  lastParticles,
-  new Vector2(innerWidth-300, innerHeight/2),
-  20,
-  1,
-  lastOptions
+// let lastEmitter = new Emitter(
+//   canvas,
+//   lastParticles,
+//   new Vector2(innerWidth - 300, innerHeight / 2),
+//   10,
+//   1,
+//   lastOptions
+// );
+
+// physics particle
+let smokeParticle = new ParticleDescriptor(
+  5,
+  new HSLA(90, 5, 10, 1),
+  "circle",
+  3,
+  "normal"
 );
+
+let smokePhysicsParticle = new PhysicsParticleDescriptor(
+  0.1,
+  0.9,
+  -1,
+  1.2,
+  smokeParticle
+);
+
+let physicsOptions = {
+  physicsMode: "full",
+  colourMode: "random"
+};
+
+let physicsEmitter = new Emitter(canvas,smokePhysicsParticle,new Vector2(innerWidth - 300, innerHeight / 2 ),300,0.2,physicsOptions)
+
+
 
 canvas.emitters.push(fibEmitter);
 canvas.emitters.push(oppositeSinEmitter);
-canvas.emitters.push(lastEmitter);
+// canvas.emitters.push(lastEmitter);
+canvas.emitters.push(physicsEmitter);
 
 animate(canvas);
