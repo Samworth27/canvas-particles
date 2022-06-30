@@ -7,7 +7,7 @@ class PhysicsParticle extends Particle {
     this.dragCoefficient = descriptor.dragCoefficient;
     this.airDensity = descriptor.airDensity;
     this.gravity = descriptor.gravity;
-    this.area = (Math.PI * this.size * this.size) / 1000;
+    this.area = (Math.PI * this.size * this.size) / 10000;
   }
 
   build(descriptor, ...args) {
@@ -16,7 +16,7 @@ class PhysicsParticle extends Particle {
     this.dragCoefficient = descriptor.dragCoefficient;
     this.airDensity = descriptor.airDensity;
     this.gravity = descriptor.gravity;
-    this.area = (Math.PI * this.size * this.size) / 1000;
+    this.area = (Math.PI * this.size * this.size) / 10000;
   }
 
   applyGravity() {
