@@ -1,9 +1,9 @@
 class ColourString {
-
+  constructor() {}
 }
 
 class HSL extends ColourString {
-  constructor(hue,saturation,luminosity) {
+  constructor(hue, saturation, luminosity) {
     super();
     this.hue = hue;
     this.saturation = saturation;
@@ -12,13 +12,21 @@ class HSL extends ColourString {
 }
 
 class HSLA extends HSL {
-  constructor(hue,saturation,luminosity,alpha) {
-    super(hue,saturation,luminosity);
+  constructor(hue, saturation, luminosity, alpha) {
+    super(hue, saturation, luminosity);
     this.alpha = alpha;
   }
   toString() {
     return `hsla(${this.hue},${this.saturation}%,${this.luminosity}%,${this.alpha})`;
   }
+  clone() {
+    return new HSLA(
+      this.hue,
+      this.saturation,
+      this.luminosity,
+      this.alpha
+    );
+  }
 }
 
-export {HSL, HSLA};
+export { HSL, HSLA };
