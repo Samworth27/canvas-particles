@@ -35,10 +35,10 @@ class PhysicsParticle extends Particle {
     this.applyFriction();
     this.applyGravity();
   }
-  update(){
-    this.getOlder();
+  update(dt){
+    this.getOlder(dt);
     this.applyForces();
-    this.move();
+    this.move(dt);
     this.draw();
     this.reset();
   }
