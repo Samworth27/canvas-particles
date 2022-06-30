@@ -7,4 +7,20 @@ class ParticleDescriptor {
     this.movement = movement;
   }
 }
-export {ParticleDescriptor};
+
+class PhysicsParticleDescriptor {
+  constructor(mass, dragCoefficient, gravity, airDensity, particleDescriptor){
+    this.size = particleDescriptor.size;
+    this.colour = particleDescriptor.colour;
+    this.shape = particleDescriptor.shape;
+    this.lifespan = particleDescriptor.lifespan;
+    this.movement = particleDescriptor.movement;
+    this.mass = mass;
+    this.dragCoefficient = dragCoefficient;
+    this.gravity = gravity;
+    this.airDensity = airDensity;
+  }
+}
+
+export default ParticleDescriptor;
+export { ParticleDescriptor, PhysicsParticleDescriptor}
