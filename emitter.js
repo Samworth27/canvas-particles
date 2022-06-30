@@ -167,9 +167,15 @@ canvas.emitters.push(oppositeSinEmitter);
 canvas.emitters.push(physicsEmitter);
 canvas.emitters.push(smokeCoverup);
 
-// document.addEventListener("mousemove", (event) => {
-//   mousePosition.x = event.clientX;
-//   mousePosition.y = event.clientY;
-// });
+document.addEventListener("click", (event)=>{
+  const position = new Vector2(event.clientX,event.clientY);
+  const particle = new ParticleDescriptor(2,new HSLA(120, 50, 50,1),'circle',5,'normal')
+  const options = {
+    spawnMode: 'burst'
+  }
+  const emitter = new Emitter(canvas, particle, position, 100, 1, options)
+  canvas.emitters.push(emitter);
+
+})
 
 animate(canvas);
