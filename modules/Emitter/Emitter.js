@@ -1,22 +1,25 @@
 import { Vector2 } from "./../Vectors.js";
 import Particle from "./Particle.js";
+import PhysicsParticle from "./PhysicsParticle.js";
 
 /**
- * options:  
- *  
- * directionMode: ['set','spin','random'] - defaults to 'random'    
- * direction: [number] - use with directionMode 'set'  
- * spinSpeed: [number] - use with directionMode 'spin'  
- * 
+ * options:
+ *
+ * directionMode: ['set','spin','random'] - defaults to 'random'
+ * direction: [number] - use with directionMode 'set'
+ * spinSpeed: [number] - use with directionMode 'spin'
+ *
  * selectionMode: ['sequential','random'] - if the emitter is provided with an
  * array of particle descriptors, this defines how the emitter picks the next particle
  * to spawn. Defaults to 'random'
- * 
+ *
  * linkMode: ['all', 'alternate', 'none] - how often to link particles
- * 
+ *
  * colourMode: ['set','cycle','random'] - defaults to 'set'
  * colourCycleSpeed: [number] - use with colourMode 'cycle'
  * note: using any colour mode except 'set' will cause a slowdown
+ *
+ * physicsMode: ['none','full']
  */
 class Emitter {
   constructor(canvas, descriptor, position, rate, force, options = {}) {
@@ -26,7 +29,7 @@ class Emitter {
     this.rate = 1 / rate;
     this.force = force;
     this.particles = [];
-    this.lastSpawn = this.rate + 1;
+    this.lastSpawn = this.rate;
     this.pool = [];
 
     // define direction related properties
@@ -61,6 +64,8 @@ class Emitter {
         this.colourCycleSpeed = options.colourCycleSpeed || 0;
         break;
     }
+    // physics related properties
+    this.physicsMode = options.physicsMode || "none";
   }
 
   spawnParticle(dt) {
@@ -95,36 +100,49 @@ class Emitter {
             this.descriptor[Math.floor(Math.random() * this.descriptor.length)];
       }
     }
-
     let newParticle;
     if (this.pool.length > 0) {
       newParticle = this.pool.pop();
       newParticle.rebuild(descriptor, this.position, velocity, this.canvas);
     } else {
-      newParticle = new Particle(
-        descriptor,
-        this.position,
-        velocity,
-        this.canvas
-      );
+      switch (this.physicsMode) {
+        case "full":
+          newParticle = new PhysicsParticle(
+            descriptor,
+            this.position,
+            velocity,
+            this.canvas
+          );
+          break;
+
+        default:
+          newParticle = new Particle(
+            descriptor,
+            this.position,
+            velocity,
+            this.canvas
+          );
+          break;
+      }
     }
+
 
     // define particle colour
     let colour;
     switch (this.colourMode) {
       case "random":
-        colour = Object.create(newParticle.colour);
+        colour = newParticle.colour.clone();
         colour.hue = Math.random() * 360;
         newParticle.colour = colour;
         break;
       case "cycle":
-        let lastParticle = this.particles.slice(-1)[0] || descriptor;
-        colour = Object.create(lastParticle.colour);
+        const lastParticle = this.particles.slice(-1)[0] || descriptor;
+        colour = lastParticle.colour.clone();
         colour.hue += this.colourCycleSpeed * dt;
         newParticle.colour = colour;
         break;
+      default:
     }
-    
 
     switch (this.linkMode) {
       case "alternate":
@@ -150,12 +168,13 @@ class Emitter {
   }
 
   update(dt) {
-    if (this.lastSpawn > this.rate) {
+    this.lastSpawn += dt;
+    for (let i = 0; i < Math.floor(this.lastSpawn / this.rate); i++) {
       this.spawnParticle(dt);
-      this.lastSpawn = 0;
-    } else {
-      this.lastSpawn += dt;
+      this.lastSpawn -= this.rate;
     }
+
+
 
     this.particles.forEach((particle) => {
       particle.update(dt);
@@ -164,9 +183,6 @@ class Emitter {
         this.pool.push(this.particles.splice(index, 1)[0]);
       }
     });
-    // console.log(
-    //   `FPS: ${window.fps} | particles: ${this.particles.length} | pool: ${this.pool.length}`
-    // );
   }
 
   get isDead() {
