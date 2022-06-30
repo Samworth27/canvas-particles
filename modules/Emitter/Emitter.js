@@ -19,7 +19,9 @@ import PhysicsParticle from "./PhysicsParticle.js";
  * colourCycleSpeed: [number] - use with colourMode 'cycle'
  * note: using any colour mode except 'set' will cause a slowdown
  *
- * physicsMode: ['none','full']
+ * physicsMode: ['none','full'] - defaults to 'none'
+ *
+ * spawnMode: ['continuous','burst'] - default to 'continuous'
  */
 class Emitter {
   constructor(canvas, descriptor, position, rate, force, options = {}) {
@@ -31,6 +33,7 @@ class Emitter {
     this.particles = [];
     this.lastSpawn = this.rate;
     this.pool = [];
+    this.age = 0;
 
     // define direction related properties
     this.directionMode = options.directionMode || "random";
@@ -66,6 +69,18 @@ class Emitter {
     }
     // physics related properties
     this.physicsMode = options.physicsMode || "none";
+
+    // spawn related properties
+    this.spawnMode = options.spawnMode || "continuous";
+    switch (this.spawnMode) {
+      case "continuous":
+        this.lifespan = options.lifespan || Infinity;
+        break;
+      case "burst":
+        this.burstCount = 0;
+        this.bursts = options.bursts || 1;
+        break;
+    }
   }
 
   spawnParticle(dt) {
@@ -127,7 +142,6 @@ class Emitter {
       }
     }
 
-
     // define particle colour
     let colour;
     switch (this.colourMode) {
@@ -169,25 +183,49 @@ class Emitter {
   }
 
   update(dt) {
-    this.lastSpawn += dt;
-    for (let i = 0; i < Math.floor(this.lastSpawn / this.rate); i++) {
-      this.spawnParticle(dt);
-      this.lastSpawn -= this.rate;
+    switch (this.spawnMode) {
+      case "continuous":
+        this.lastSpawn += dt;
+        for (let i = 0; i < Math.floor(this.lastSpawn / this.rate); i++) {
+          this.spawnParticle(dt);
+          this.lastSpawn -= this.rate;
+        }
+        break;
+      case "burst":
+        if (this.burstCount < this.bursts) {
+          for (let i = 0; i < 1 / this.rate; i++) {
+            this.spawnParticle(dt);
+          }
+          this.burstCount++;
+        }
+        break;
     }
-
-
 
     this.particles.forEach((particle) => {
       particle.update(dt);
       if (particle.isDead) {
         let index = this.particles.indexOf(particle);
-        this.pool.push(this.particles.splice(index, 1)[0]);
+        let deadParticle = this.particles.splice(index, 10)[0];
+        switch (this.spawnMode) {
+          case "continuous":
+            this.pool.push(deadParticle);
+            break;
+          case "burst":
+            deadParticle = null;
+            break;
+        }
       }
     });
   }
 
   get isDead() {
-    return false;
+    switch (this.spawnMode) {
+      case "continuous":
+        return this.age > this.lifespan;
+      case "burst":
+        return this.burstCount >= this.bursts && this.particles.length == 0;
+        break;
+    }
   }
 }
 
